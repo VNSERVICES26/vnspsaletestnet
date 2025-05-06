@@ -1,7 +1,7 @@
 let web3;
 let userAccount;
 
-const vnsPresaleAddress = "0xABBEb28D0181ebD5E081AE903F6bAE6898d18979";
+const vnsPresaleAddress = "0x4e8a2994f87843ad9EA5F6bda956aC1b181A3323";
 const usdtTokenAddress = "0x337610d27c682E347C9cD60BD4b3b107C9d34dDd";
 const vnsTokenAddress = "0x369c1487fA77D9e63D60662f1C657f7621ae1053";
 

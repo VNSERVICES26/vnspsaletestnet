@@ -1,36 +1,26 @@
 <!DOCTYPE html>
-<html lang="hi">
+<html lang="en">
 <head>
   <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>VNS टोकन प्रीसेल</title>
-  <link rel="stylesheet" href="style.css" />
-  <script src="https://cdn.jsdelivr.net/npm/web3@1.8.2/dist/web3.min.js"></script>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>VNS Token Interface</title>
+  <link rel="stylesheet" href="style.css"/>
 </head>
 <body>
   <div class="container">
-    <h1>🚀 VNS टोकन खरीदें</h1>
-    <p class="info">न्यूनतम: 10 VNS | अधिकतम: 500 VNS</p>
-    <p class="contract-address">
-      कॉन्ट्रैक्ट: <span id="contractAddress">0xABBEb28D0181ebD5E081AE903F6bAE6898d18979</span>
-      <button onclick="copyAddress()">📋 कॉपी करें</button>
-    </p>
+    <h1>VNS Token Interface</h1>
 
-    <div class="input-group">
-      <label for="vnsAmount">VNS मात्रा:</label>
-      <input type="number" id="vnsAmount" placeholder="VNS मात्रा दर्ज करें" />
-    </div>
-    <div class="input-group">
-      <label for="usdtAmount">USDT राशि:</label>
-      <input type="number" id="usdtAmount" placeholder="स्वचालित गणना" disabled />
-    </div>
+    <button onclick="connectWallet()">Connect Wallet</button>
+    <button onclick="buyToken()">Buy Token</button>
+    <button onclick="sellToken()">Sell Token</button>
+    <button onclick="getBalance()">Check Balance</button>
+    <button onclick="getTokenName()">Get Token Name</button>
+    <button onclick="getTotalSupply()">Get Total Supply</button>
 
-    <button id="connectButton">🔗 वॉलेट कनेक्ट करें</button>
-    <button id="buyButton">💸 VNS खरीदें</button>
-
-    <p id="status"></p>
+    <div id="output"></div>
   </div>
 
+  <script src="https://cdn.ethers.io/lib/ethers-5.2.umd.min.js" type="application/javascript"></script>
   <script src="script.js"></script>
 </body>
 </html>

@@ -1,0 +1,36 @@
+<!DOCTYPE html>
+<html lang="hi">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>VNS टोकन प्रीसेल</title>
+  <link rel="stylesheet" href="style.css" />
+  <script src="https://cdn.jsdelivr.net/npm/web3@1.8.2/dist/web3.min.js"></script>
+</head>
+<body>
+  <div class="container">
+    <h1>🚀 VNS टोकन खरीदें</h1>
+    <p class="info">न्यूनतम: 10 VNS | अधिकतम: 500 VNS</p>
+    <p class="contract-address">
+      कॉन्ट्रैक्ट: <span id="contractAddress">0xABBEb28D0181ebD5E081AE903F6bAE6898d18979</span>
+      <button onclick="copyAddress()">📋 कॉपी करें</button>
+    </p>
+
+    <div class="input-group">
+      <label for="vnsAmount">VNS मात्रा:</label>
+      <input type="number" id="vnsAmount" placeholder="VNS मात्रा दर्ज करें" />
+    </div>
+    <div class="input-group">
+      <label for="usdtAmount">USDT राशि:</label>
+      <input type="number" id="usdtAmount" placeholder="स्वचालित गणना" disabled />
+    </div>
+
+    <button id="connectButton">🔗 वॉलेट कनेक्ट करें</button>
+    <button id="buyButton">💸 VNS खरीदें</button>
+
+    <p id="status"></p>
+  </div>
+
+  <script src="script.js"></script>
+</body>
+</html>

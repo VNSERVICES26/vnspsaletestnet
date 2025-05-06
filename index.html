@@ -1,26 +1,85 @@
+<!-- index.html -->
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>VNS Token Interface</title>
-  <link rel="stylesheet" href="style.css"/>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>VNS Token Presale</title>
+    <link rel="stylesheet" href="style.css">
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600&display=swap" rel="stylesheet">
 </head>
 <body>
-  <div class="container">
-    <h1>VNS Token Interface</h1>
+    <div class="container">
+        <header>
+            <h1>VNS Token Presale</h1>
+            <div class="network-indicator" id="networkIndicator">Not Connected</div>
+        </header>
 
-    <button onclick="connectWallet()">Connect Wallet</button>
-    <button onclick="buyToken()">Buy Token</button>
-    <button onclick="sellToken()">Sell Token</button>
-    <button onclick="getBalance()">Check Balance</button>
-    <button onclick="getTokenName()">Get Token Name</button>
-    <button onclick="getTotalSupply()">Get Total Supply</button>
+        <div class="card">
+            <div class="wallet-section">
+                <button id="connectWalletBtn">Connect Wallet</button>
+                <div id="walletAddress" class="wallet-address"></div>
+            </div>
 
-    <div id="output"></div>
-  </div>
+            <div class="contract-info">
+                <h3>Contract Details</h3>
+                <div class="info-row">
+                    <span>VNS Token:</span>
+                    <span id="vnsTokenAddress">0x76f8F13B04B85443afDE3D29991363BF54b756fD</span>
+                    <button class="copy-btn" onclick="copyToClipboard('vnsTokenAddress')">Copy</button>
+                </div>
+                <div class="info-row">
+                    <span>Presale Contract:</span>
+                    <span id="presaleAddress">0x4e8a2994f87843ad9EA5F6bda956aC1b181A3323</span>
+                    <button class="copy-btn" onclick="copyToClipboard('presaleAddress')">Copy</button>
+                </div>
+                <div class="info-row">
+                    <span>Current Price:</span>
+                    <span id="currentPrice">Loading...</span>
+                </div>
+                <div class="info-row">
+                    <span>Purchase Limits:</span>
+                    <span id="purchaseLimits">10-500 VNS per transaction</span>
+                </div>
+            </div>
 
-  <script src="https://cdn.ethers.io/lib/ethers-5.2.umd.min.js" type="application/javascript"></script>
-  <script src="script.js"></script>
+            <div class="buy-section">
+                <div class="tabs">
+                    <button class="tab-btn active" id="tabVNS">Buy with VNS Amount</button>
+                    <button class="tab-btn" id="tabUSDT">Buy with USDT Amount</button>
+                </div>
+
+                <div class="tab-content active" id="vnsTab">
+                    <div class="input-group">
+                        <label for="vnsAmount">VNS Amount (8 decimals)</label>
+                        <input type="number" id="vnsAmount" placeholder="Enter VNS amount">
+                        <div class="limits">Min: 10 VNS | Max: 500 VNS</div>
+                    </div>
+                    <div class="calculation">
+                        <div>USDT Required: <span id="usdtRequired">0</span></div>
+                    </div>
+                    <button id="buyWithVNSBtn" class="buy-btn">Buy VNS Tokens</button>
+                </div>
+
+                <div class="tab-content" id="usdtTab">
+                    <div class="input-group">
+                        <label for="usdtAmount">USDT Amount (18 decimals)</label>
+                        <input type="number" id="usdtAmount" placeholder="Enter USDT amount">
+                        <div class="limits">Min: 9 USDT | Max: 450 USDT</div>
+                    </div>
+                    <div class="calculation">
+                        <div>VNS You Get: <span id="vnsYouGet">0</span></div>
+                    </div>
+                    <button id="buyWithUSDTBtn" class="buy-btn">Buy with USDT</button>
+                </div>
+            </div>
+        </div>
+
+        <div class="transaction-status" id="transactionStatus"></div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/web3@1.5.2/dist/web3.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@walletconnect/web3-provider@1.7.8/dist/umd/index.min.js"></script>
+    <script src="script.js"></script>
 </body>
 </html>

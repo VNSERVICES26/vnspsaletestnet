@@ -1,4 +1,3 @@
-<!-- index.html -->
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -6,80 +5,97 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>VNS Token Presale</title>
     <link rel="stylesheet" href="style.css">
-    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
 </head>
 <body>
     <div class="container">
         <header>
             <h1>VNS Token Presale</h1>
-            <div class="network-indicator" id="networkIndicator">Not Connected</div>
+            <div id="wallet-section">
+                <button id="connect-wallet">Connect Wallet</button>
+                <span id="wallet-address"></span>
+            </div>
         </header>
 
-        <div class="card">
-            <div class="wallet-section">
-                <button id="connectWalletBtn">Connect Wallet</button>
-                <div id="walletAddress" class="wallet-address"></div>
-            </div>
-
-            <div class="contract-info">
-                <h3>Contract Details</h3>
+        <div class="dashboard">
+            <div class="info-card">
+                <h3>Presale Information</h3>
                 <div class="info-row">
-                    <span>VNS Token:</span>
-                    <span id="vnsTokenAddress">0x76f8F13B04B85443afDE3D29991363BF54b756fD</span>
-                    <button class="copy-btn" onclick="copyToClipboard('vnsTokenAddress')">Copy</button>
+                    <span>Price per VNS:</span>
+                    <span id="price-per-vns">Loading...</span>
                 </div>
                 <div class="info-row">
-                    <span>Presale Contract:</span>
-                    <span id="presaleAddress">0x4e8a2994f87843ad9EA5F6bda956aC1b181A3323</span>
-                    <button class="copy-btn" onclick="copyToClipboard('presaleAddress')">Copy</button>
+                    <span>Minimum Purchase:</span>
+                    <span id="min-purchase">Loading...</span>
                 </div>
                 <div class="info-row">
-                    <span>Current Price:</span>
-                    <span id="currentPrice">Loading...</span>
+                    <span>Seller VNS Balance:</span>
+                    <span id="seller-balance">Loading...</span>
                 </div>
                 <div class="info-row">
-                    <span>Purchase Limits:</span>
-                    <span id="purchaseLimits">10-500 VNS per transaction</span>
+                    <span>Contract Status:</span>
+                    <span id="contract-status">Loading...</span>
                 </div>
             </div>
 
-            <div class="buy-section">
-                <div class="tabs">
-                    <button class="tab-btn active" id="tabVNS">Buy with VNS Amount</button>
-                    <button class="tab-btn" id="tabUSDT">Buy with USDT Amount</button>
+            <div class="user-card">
+                <h3>Your Information</h3>
+                <div class="info-row">
+                    <span>Your USDT Balance:</span>
+                    <span id="user-usdt-balance">0.00</span>
                 </div>
-
-                <div class="tab-content active" id="vnsTab">
-                    <div class="input-group">
-                        <label for="vnsAmount">VNS Amount (8 decimals)</label>
-                        <input type="number" id="vnsAmount" placeholder="Enter VNS amount">
-                        <div class="limits">Min: 10 VNS | Max: 500 VNS</div>
-                    </div>
-                    <div class="calculation">
-                        <div>USDT Required: <span id="usdtRequired">0</span></div>
-                    </div>
-                    <button id="buyWithVNSBtn" class="buy-btn">Buy VNS Tokens</button>
+                <div class="info-row">
+                    <span>Your VNS Balance:</span>
+                    <span id="user-vns-balance">0.00</span>
                 </div>
-
-                <div class="tab-content" id="usdtTab">
-                    <div class="input-group">
-                        <label for="usdtAmount">USDT Amount (18 decimals)</label>
-                        <input type="number" id="usdtAmount" placeholder="Enter USDT amount">
-                        <div class="limits">Min: 9 USDT | Max: 450 USDT</div>
-                    </div>
-                    <div class="calculation">
-                        <div>VNS You Get: <span id="vnsYouGet">0</span></div>
-                    </div>
-                    <button id="buyWithUSDTBtn" class="buy-btn">Buy with USDT</button>
+                <div class="info-row">
+                    <span>USDT Allowance:</span>
+                    <span id="usdt-allowance">0.00</span>
                 </div>
             </div>
         </div>
 
-        <div class="transaction-status" id="transactionStatus"></div>
+        <div class="buy-section">
+            <h2>Buy VNS Tokens</h2>
+            <div class="input-group">
+                <label for="vns-amount">VNS Amount:</label>
+                <input type="number" id="vns-amount" placeholder="Enter VNS amount">
+                <div class="calc-group">
+                    <span>=</span>
+                    <span id="usdt-equivalent">0.00</span>
+                    <span>USDT</span>
+                </div>
+            </div>
+
+            <div class="button-group">
+                <button id="approve-usdt">Approve USDT</button>
+                <button id="buy-vns">Buy VNS</button>
+            </div>
+
+            <div id="transaction-status"></div>
+        </div>
+
+        <div class="contract-info">
+            <h3>Contract Addresses</h3>
+            <div class="address-row">
+                <span>VNS Token:</span>
+                <span id="vns-address" class="copyable">Loading...</span>
+                <button class="copy-btn" data-target="vns-address"><i class="fas fa-copy"></i></button>
+            </div>
+            <div class="address-row">
+                <span>USDT Token:</span>
+                <span id="usdt-address" class="copyable">Loading...</span>
+                <button class="copy-btn" data-target="usdt-address"><i class="fas fa-copy"></i></button>
+            </div>
+            <div class="address-row">
+                <span>Presale Contract:</span>
+                <span id="presale-address" class="copyable">Loading...</span>
+                <button class="copy-btn" data-target="presale-address"><i class="fas fa-copy"></i></button>
+            </div>
+        </div>
     </div>
 
     <script src="https://cdn.jsdelivr.net/npm/web3@1.5.2/dist/web3.min.js"></script>
-    <script src="https://cdn.jsdelivr.net/npm/@walletconnect/web3-provider@1.7.8/dist/umd/index.min.js"></script>
     <script src="script.js"></script>
 </body>
 </html>

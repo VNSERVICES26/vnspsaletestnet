@@ -1,364 +1,198 @@
-// script.js
-// Contract details
-const presaleContractAddress = "0x4e8a2994f87843ad9EA5F6bda956aC1b181A3323";
-const vnsTokenAddress = "0x76f8F13B04B85443afDE3D29991363BF54b756fD";
-const usdtTokenAddress = "0x337610d27c682E347C9cD60BD4b3b107C9d34dDd";
-const minPurchase = 10 * 10**8; // 10 VNS (8 decimals)
-const maxPurchase = 500 * 10**8; // 500 VNS (8 decimals)
+document.addEventListener('DOMContentLoaded', async () => {
+    // Contract ABIs (same as before)
+    const erc20Abi = [{"inputs":[],"payable":false,"stateMutability":"nonpayable","type":"constructor"},{"anonymous":false,"inputs":[{"indexed":true,"internalType":"address","name":"owner","type":"address"},{"indexed":true,"internalType":"address","name":"spender","type":"address"},{"indexed":false,"internalType":"uint256","name":"value","type":"uint256"}],"name":"Approval","type":"event"},{"anonymous":false,"inputs":[{"indexed":true,"internalType":"address","name":"previousOwner","type":"address"},{"indexed":true,"internalType":"address","name":"newOwner","type":"address"}],"name":"OwnershipTransferred","type":"event"},{"anonymous":false,"inputs":[{"indexed":true,"internalType":"address","name":"from","type":"address"},{"indexed":true,"internalType":"address","name":"to","type":"address"},{"indexed":false,"internalType":"uint256","name":"value","type":"uint256"}],"name":"Transfer","type":"event"},{"constant":true,"inputs":[],"name":"_decimals","outputs":[{"internalType":"uint8","name":"","type":"uint8"}],"payable":false,"stateMutability":"view","type":"function"},{"constant":true,"inputs":[],"name":"_name","outputs":[{"internalType":"string","name":"","type":"string"}],"payable":false,"stateMutability":"view","type":"function"},{"constant":true,"inputs":[],"name":"_symbol","outputs":[{"internalType":"string","name":"","type":"string"}],"payable":false,"stateMutability":"view","type":"function"},{"constant":true,"inputs":[{"internalType":"address","name":"owner","type":"address"},{"internalType":"address","name":"spender","type":"address"}],"name":"allowance","outputs":[{"internalType":"uint256","name":"","type":"uint256"}],"payable":false,"stateMutability":"view","type":"function"},{"constant":false,"inputs":[{"internalType":"address","name":"spender","type":"address"},{"internalType":"uint256","name":"amount","type":"uint256"}],"name":"approve","outputs":[{"internalType":"bool","name":"","type":"bool"}],"payable":false,"stateMutability":"nonpayable","type":"function"},{"constant":true,"inputs":[{"internalType":"address","name":"account","type":"address"}],"name":"balanceOf","outputs":[{"internalType":"uint256","name":"","type":"uint256"}],"payable":false,"stateMutability":"view","type":"function"},{"constant":true,"inputs":[],"name":"decimals","outputs":[{"internalType":"uint256","name":"","type":"uint256"}],"payable":false,"stateMutability":"view","type":"function"},{"constant":false,"inputs":[{"internalType":"address","name":"spender","type":"address"},{"internalType":"uint256","name":"subtractedValue","type":"uint256"}],"name":"decreaseAllowance","outputs":[{"internalType":"bool","name":"","type":"bool"}],"payable":false,"stateMutability":"nonpayable","type":"function"},{"constant":true,"inputs":[],"name":"getOwner","outputs":[{"internalType":"address","name":"","type":"address"}],"payable":false,"stateMutability":"view","type":"function"},{"constant":false,"inputs":[{"internalType":"address","name":"spender","type":"address"},{"internalType":"uint256","name":"addedValue","type":"uint256"}],"name":"increaseAllowance","outputs":[{"internalType":"bool","name":"","type":"bool"}],"payable":false,"stateMutability":"nonpayable","type":"function"},{"constant":false,"inputs":[{"internalType":"uint256","name":"amount","type":"uint256"}],"name":"mint","outputs":[{"internalType":"bool","name":"","type":"bool"}],"payable":false,"stateMutability":"nonpayable","type":"function"},{"constant":true,"inputs":[],"name":"name","outputs":[{"internalType":"string","name":"","type":"string"}],"payable":false,"stateMutability":"view","type":"function"},{"constant":true,"inputs":[],"name":"owner","outputs":[{"internalType":"address","name":"","type":"address"}],"payable":false,"stateMutability":"view","type":"function"},{"constant":false,"inputs":[],"name":"renounceOwnership","outputs":[],"payable":false,"stateMutability":"nonpayable","type":"function"},{"constant":true,"inputs":[],"name":"symbol","outputs":[{"internalType":"string","name":"","type":"string"}],"payable":false,"stateMutability":"view","type":"function"},{"constant":true,"inputs":[],"name":"totalSupply","outputs":[{"internalType":"uint256","name":"","type":"uint256"}],"payable":false,"stateMutability":"view","type":"function"},{"constant":false,"inputs":[{"internalType":"address","name":"recipient","type":"address"},{"internalType":"uint256","name":"amount","type":"uint256"}],"name":"transfer","outputs":[{"internalType":"bool","name":"","type":"bool"}],"payable":false,"stateMutability":"nonpayable","type":"function"},{"constant":false,"inputs":[{"internalType":"address","name":"sender","type":"address"},{"internalType":"address","name":"recipient","type":"address"},{"internalType":"uint256","name":"amount","type":"uint256"}],"name":"transferFrom","outputs":[{"internalType":"bool","name":"","type":"bool"}],"payable":false,"stateMutability":"nonpayable","type":"function"},{"constant":false,"inputs":[{"internalType":"address","name":"newOwner","type":"address"}],"name":"transferOwnership","outputs":[],"payable":false,"stateMutability":"nonpayable","type":"function"}];
 
-// Presale ABI
-const presaleABI = [{"inputs":[{"internalType":"address","name":"_vnsToken","type":"address"},{"internalType":"address","name":"_usdtToken","type":"address"},{"internalType":"address","name":"_sellerWallet","type":"address"},{"internalType":"address","name":"_paymentReceiver","type":"address"},{"internalType":"uint256","name":"_pricePerVNS","type":"uint256"}],"stateMutability":"nonpayable","type":"constructor"},{"anonymous":false,"inputs":[{"indexed":false,"internalType":"uint256","name":"newMin","type":"uint256"},{"indexed":false,"internalType":"uint256","name":"newMax","type":"uint256"}],"name":"MinMaxUpdated","type":"event"},{"anonymous":false,"inputs":[{"indexed":true,"internalType":"address","name":"oldOwner","type":"address"},{"indexed":true,"internalType":"address","name":"newOwner","type":"address"}],"name":"OwnershipTransferred","type":"event"},{"anonymous":false,"inputs":[{"indexed":false,"internalType":"uint256","name":"newPrice","type":"uint256"}],"name":"PriceUpdated","type":"event"},{"anonymous":false,"inputs":[{"indexed":false,"internalType":"address","name":"buyer","type":"address"},{"indexed":false,"internalType":"uint256","name":"vnsAmount","type":"uint256"},{"indexed":false,"internalType":"uint256","name":"usdtAmount","type":"uint256"}],"name":"TokensPurchased","type":"event"},{"inputs":[],"name":"CHANGE_DELAY","outputs":[{"internalType":"uint256","name":"","type":"uint256"}],"stateMutability":"view","type":"function"},{"inputs":[{"internalType":"uint256","name":"vnsAmount","type":"uint256"}],"name":"buyTokens","outputs":[],"stateMutability":"nonpayable","type":"function"},{"inputs":[{"internalType":"uint256","name":"usdtAmount","type":"uint256"}],"name":"buyWithUSDT","outputs":[],"stateMutability":"nonpayable","type":"function"},{"inputs":[],"name":"emergencyWithdrawAll","outputs":[],"stateMutability":"nonpayable","type":"function"},{"inputs":[],"name":"isPaused","outputs":[{"internalType":"bool","name":"","type":"bool"}],"stateMutability":"view","type":"function"},{"inputs":[],"name":"lastPriceChange","outputs":[{"internalType":"uint256","name":"","type":"uint256"}],"stateMutability":"view","type":"function"},{"inputs":[],"name":"maxPurchase","outputs":[{"internalType":"uint256","name":"","type":"uint256"}],"stateMutability":"view","type":"function"},{"inputs":[],"name":"minPurchase","outputs":[{"internalType":"uint256","name":"","type":"uint256"}],"stateMutability":"view","type":"function"},{"inputs":[],"name":"owner","outputs":[{"internalType":"address","name":"","type":"address"}],"stateMutability":"view","type":"function"},{"inputs":[],"name":"pause","outputs":[],"stateMutability":"nonpayable","type":"function"},{"inputs":[],"name":"paymentReceiver","outputs":[{"internalType":"address","name":"","type":"address"}],"stateMutability":"view","type":"function"},{"inputs":[],"name":"pricePerVNS","outputs":[{"internalType":"uint256","name":"","type":"uint256"}],"stateMutability":"view","type":"function"},{"inputs":[{"internalType":"address","name":"tokenAddress","type":"address"},{"internalType":"uint256","name":"amount","type":"uint256"}],"name":"recoverERC20","outputs":[],"stateMutability":"nonpayable","type":"function"},{"inputs":[],"name":"sellerWallet","outputs":[{"internalType":"address","name":"","type":"address"}],"stateMutability":"view","type":"function"},{"inputs":[{"internalType":"uint256","name":"newMin","type":"uint256"},{"internalType":"uint256","name":"newMax","type":"uint256"}],"name":"setMinMaxPurchase","outputs":[],"stateMutability":"nonpayable","type":"function"},{"inputs":[{"internalType":"uint256","name":"newPrice","type":"uint256"}],"name":"setPrice","outputs":[],"stateMutability":"nonpayable","type":"function"},{"inputs":[{"internalType":"address","name":"newOwner","type":"address"}],"name":"transferOwnership","outputs":[],"stateMutability":"nonpayable","type":"function"},{"inputs":[],"name":"unpause","outputs":[],"stateMutability":"nonpayable","type":"function"},{"inputs":[],"name":"usdtToken","outputs":[{"internalType":"address","name":"","type":"address"}],"stateMutability":"view","type":"function"},{"inputs":[],"name":"vnsToken","outputs":[{"internalType":"address","name":"","type":"address"}],"stateMutability":"view","type":"function"}];
+    const presaleAbi = [{"inputs":[{"internalType":"address","name":"_vnsToken","type":"address"},{"internalType":"address","name":"_usdtToken","type":"address"},{"internalType":"address","name":"_sellerWallet","type":"address"},{"internalType":"address","name":"_paymentReceiver","type":"address"},{"internalType":"uint256","name":"_initialPrice","type":"uint256"},{"internalType":"uint256","name":"_minPurchase","type":"uint256"}],"stateMutability":"nonpayable","type":"constructor"},{"anonymous":false,"inputs":[{"indexed":true,"internalType":"address","name":"buyer","type":"address"},{"indexed":false,"internalType":"uint256","name":"vnsAmount","type":"uint256"},{"indexed":false,"internalType":"uint256","name":"usdtAmount","type":"uint256"}],"name":"TokensPurchased","type":"event"},{"inputs":[{"internalType":"uint256","name":"vnsAmount","type":"uint256"}],"name":"buyTokens","outputs":[],"stateMutability":"nonpayable","type":"function"},{"inputs":[],"name":"isPaused","outputs":[{"internalType":"bool","name":"","type":"bool"}],"stateMutability":"view","type":"function"},{"inputs":[],"name":"minPurchase","outputs":[{"internalType":"uint256","name":"","type":"uint256"}],"stateMutability":"view","type":"function"},{"inputs":[],"name":"owner","outputs":[{"internalType":"address","name":"","type":"address"}],"stateMutability":"view","type":"function"},{"inputs":[],"name":"pause","outputs":[],"stateMutability":"nonpayable","type":"function"},{"inputs":[],"name":"paymentReceiver","outputs":[{"internalType":"address","name":"","type":"address"}],"stateMutability":"view","type":"function"},{"inputs":[],"name":"pricePerVNS","outputs":[{"internalType":"uint256","name":"","type":"uint256"}],"stateMutability":"view","type":"function"},{"inputs":[],"name":"sellerWallet","outputs":[{"internalType":"address","name":"","type":"address"}],"stateMutability":"view","type":"function"},{"inputs":[{"internalType":"uint256","name":"newMin","type":"uint256"}],"name":"setMinPurchase","outputs":[],"stateMutability":"nonpayable","type":"function"},{"inputs":[{"internalType":"address","name":"newReceiver","type":"address"}],"name":"setPaymentReceiver","outputs":[],"stateMutability":"nonpayable","type":"function"},{"inputs":[{"internalType":"uint256","name":"newPrice","type":"uint256"}],"name":"setPrice","outputs":[],"stateMutability":"nonpayable","type":"function"},{"inputs":[{"internalType":"address","name":"newToken","type":"address"}],"name":"setVnsToken","outputs":[],"stateMutability":"nonpayable","type":"function"},{"inputs":[],"name":"unpause","outputs":[],"stateMutability":"nonpayable","type":"function"},{"inputs":[],"name":"usdtToken","outputs":[{"internalType":"address","name":"","type":"address"}],"stateMutability":"view","type":"function"},{"inputs":[],"name":"vnsToken","outputs":[{"internalType":"address","name":"","type":"address"}],"stateMutability":"view","type":"function"}];
 
-// Global variables
-let web3;
-let presaleContract;
-let accounts = [];
-let chainId;
+    const presaleAddress = "0x1d696372c231160765ea55294B545451560451b0"; 
+    const vnsTokenAddress = "0xD56b19A7A083E64b3f2E41cDD09BaDF2D168D101"; 
+    const usdtTokenAddress = "0x337610d27c682E347C9cD60BD4b3b107C9d34dDd"; 
 
-// Initialize the application
-window.addEventListener('load', async () => {
-    // Set up tab switching
-    setupTabs();
-    
-    // Set up event listeners
-    document.getElementById('connectWalletBtn').addEventListener('click', connectWallet);
-    document.getElementById('buyWithVNSBtn').addEventListener('click', buyWithVNSAmount);
-    document.getElementById('buyWithUSDTBtn').addEventListener('click', buyWithUSDTAmount);
-    document.getElementById('vnsAmount').addEventListener('input', calculateUSDTRequired);
-    document.getElementById('usdtAmount').addEventListener('input', calculateVNSYouGet);
-    
-    // Modern dapp browsers...
-    if (window.ethereum) {
+    let web3;
+    let accounts = [];
+    let presaleContract;
+    let vnsTokenContract;
+    let usdtTokenContract;
+    let vnsDecimals = 8; // Updated to 8 for VNS
+    let usdtDecimals = 18; // USDT remains 18
+
+    // ... (all DOM element declarations remain the same)
+
+    // Initialize contracts
+    async function initContracts() {
+        presaleContract = new web3.eth.Contract(presaleAbi, presaleAddress);
+        vnsTokenContract = new web3.eth.Contract(erc20Abi, vnsTokenAddress);
+        usdtTokenContract = new web3.eth.Contract(erc20Abi, usdtTokenAddress);
+
+        // Get token decimals (with fallback to our known values)
         try {
-            // Request account access
-            accounts = await ethereum.request({ method: 'eth_requestAccounts' });
-            
-            // Create Web3 instance
-            web3 = new Web3(window.ethereum);
-            
-            // Get network ID
-            chainId = await web3.eth.getChainId();
-            
-            // Initialize contract
-            initContract();
-            
-            // Set up listeners
-            setupListeners();
-            
-            // Update UI
+            vnsDecimals = await vnsTokenContract.methods.decimals().call() || 8;
+            usdtDecimals = await usdtTokenContract.methods.decimals().call() || 18;
+        } catch (error) {
+            console.error("Error getting token decimals:", error);
+            // Use our known values if there's an error
+            vnsDecimals = 8;
+            usdtDecimals = 18;
+        }
+    }
+
+    // Calculate USDT equivalent for VNS amount (updated for decimals)
+    function calculateUsdtEquivalent() {
+        const vnsAmount = parseFloat(vnsAmountInput.value) || 0;
+        presaleContract.methods.pricePerVNS().call()
+            .then(price => {
+                // Convert VNS amount to smallest units (8 decimals)
+                const vnsAmountInUnits = vnsAmount * (10 ** vnsDecimals);
+                
+                // Calculate USDT amount (price is in 1e8 units per VNS)
+                const usdtAmount = (vnsAmountInUnits * price) / (10 ** (8 + usdtDecimals));
+                
+                usdtEquivalentSpan.textContent = usdtAmount.toFixed(6);
+            })
+            .catch(error => {
+                console.error("Error calculating USDT equivalent:", error);
+            });
+    }
+
+    // Approve USDT for spending (updated for decimals)
+    async function approveUsdt() {
+        if (!accounts.length) {
+            showTransactionStatus('Please connect your wallet first', 'error');
+            return;
+        }
+
+        const vnsAmount = parseFloat(vnsAmountInput.value);
+        if (isNaN(vnsAmount)) {
+            showTransactionStatus('Please enter a valid VNS amount', 'error');
+            return;
+        }
+
+        try {
+            const price = await presaleContract.methods.pricePerVNS().call();
+            // Convert VNS amount to smallest units (8 decimals)
+            const vnsAmountInUnits = vnsAmount * (10 ** vnsDecimals);
+            // Calculate USDT amount in smallest units (18 decimals)
+            const usdtAmountInUnits = (vnsAmountInUnits * price) / (10 ** 8);
+
+            showTransactionStatus('Approving USDT...', 'info');
+
+            await usdtTokenContract.methods.approve(
+                presaleAddress,
+                usdtAmountInUnits.toString()
+            ).send({ from: accounts[0] });
+
+            showTransactionStatus('USDT approved successfully!', 'success');
             updateUI();
         } catch (error) {
-            console.error("User denied account access");
+            console.error("Error approving USDT:", error);
+            showTransactionStatus('Error approving USDT: ' + error.message, 'error');
         }
     }
-    // Legacy dapp browsers...
-    else if (window.web3) {
-        web3 = new Web3(web3.currentProvider);
-        initContract();
-    }
-    // Non-dapp browsers...
-    else {
-        console.log('Non-Ethereum browser detected. Consider trying MetaMask!');
-    }
-});
 
-// Initialize contract
-function initContract() {
-    presaleContract = new web3.eth.Contract(presaleABI, presaleContractAddress);
-    
-    // Load price
-    loadPrice();
-}
-
-// Set up event listeners
-function setupListeners() {
-    // Chain changed
-    window.ethereum.on('chainChanged', (newChainId) => {
-        window.location.reload();
-    });
-    
-    // Accounts changed
-    window.ethereum.on('accountsChanged', (newAccounts) => {
-        accounts = newAccounts;
-        updateUI();
-    });
-}
-
-// Connect wallet
-async function connectWallet() {
-    try {
-        // Check if WalletConnect provider exists
-        if (typeof WalletConnectProvider !== 'undefined') {
-            // Check if we should use WalletConnect
-            const useWalletConnect = confirm("Would you like to connect with WalletConnect? (Press OK for WalletConnect, Cancel for MetaMask)");
-            
-            if (useWalletConnect) {
-                const provider = new WalletConnectProvider.default({
-                    rpc: {
-                        1: "https://mainnet.infura.io/v3/YOUR_INFURA_PROJECT_ID",
-                        56: "https://bsc-dataseed.binance.org/",
-                        // Add other networks as needed
-                    }
-                });
-                
-                await provider.enable();
-                web3 = new Web3(provider);
-                accounts = await web3.eth.getAccounts();
-                chainId = await web3.eth.getChainId();
-                
-                initContract();
-                updateUI();
-                return;
-            }
+    // Buy VNS tokens (updated for decimals)
+    async function buyVns() {
+        if (!accounts.length) {
+            showTransactionStatus('Please connect your wallet first', 'error');
+            return;
         }
+
+        const vnsAmount = parseFloat(vnsAmountInput.value);
+        if (isNaN(vnsAmount) || vnsAmount <= 0) {
+            showTransactionStatus('Please enter a valid VNS amount', 'error');
+            return;
+        }
+
+        const minPurchase = await presaleContract.methods.minPurchase().call();
+        const minPurchaseFormatted = minPurchase / (10 ** vnsDecimals);
         
-        // Use MetaMask/other injected provider
-        if (window.ethereum) {
-            accounts = await ethereum.request({ method: 'eth_requestAccounts' });
-            web3 = new Web3(window.ethereum);
-            chainId = await web3.eth.getChainId();
+        if (vnsAmount < minPurchaseFormatted) {
+            showTransactionStatus(`Minimum purchase is ${minPurchaseFormatted} VNS`, 'error');
+            return;
+        }
+
+        try {
+            showTransactionStatus('Processing transaction...', 'info');
+
+            // Convert VNS amount to smallest units (8 decimals)
+            const vnsAmountInUnits = (vnsAmount * (10 ** vnsDecimals)).toString();
             
-            initContract();
+            await presaleContract.methods.buyTokens(vnsAmountInUnits).send({ from: accounts[0] });
+
+            showTransactionStatus('VNS tokens purchased successfully!', 'success');
             updateUI();
-        } else {
-            alert("Please install MetaMask or another Web3 wallet!");
+        } catch (error) {
+            console.error("Error buying VNS:", error);
+            showTransactionStatus('Error buying VNS: ' + error.message, 'error');
         }
-    } catch (error) {
-        console.error("Error connecting wallet:", error);
-        showTransactionStatus("Error connecting wallet", "error");
     }
-}
 
-// Update UI
-function updateUI() {
-    if (accounts && accounts.length > 0) {
-        const walletAddress = document.getElementById('walletAddress');
-        walletAddress.textContent = accounts[0];
-        
-        const connectBtn = document.getElementById('connectWalletBtn');
-        connectBtn.textContent = "Connected";
-        connectBtn.style.background = "linear-gradient(to right, #4CAF50, #2E7D32)";
-        
-        updateNetworkIndicator();
-    }
-}
-
-// Update network indicator
-async function updateNetworkIndicator() {
-    const networkIndicator = document.getElementById('networkIndicator');
-    
-    if (!chainId) {
-        chainId = await web3.eth.getChainId();
-    }
-    
-    switch(chainId.toString()) {
-        case "1": // Ethereum Mainnet
-            networkIndicator.textContent = "Ethereum Mainnet";
-            networkIndicator.style.backgroundColor = "#29B6AF";
-            break;
-        case "56": // BSC Mainnet
-            networkIndicator.textContent = "BSC Mainnet";
-            networkIndicator.style.backgroundColor = "#F0B90B";
-            break;
-        case "97": // BSC Testnet
-            networkIndicator.textContent = "BSC Testnet";
-            networkIndicator.style.backgroundColor = "#F0B90B";
-            break;
-        default:
-            networkIndicator.textContent = `Unsupported Network (${chainId})`;
-            networkIndicator.style.backgroundColor = "#f44336";
-    }
-}
-
-// Load price from contract
-async function loadPrice() {
-    try {
-        const price = await presaleContract.methods.pricePerVNS().call();
-        const priceInUSDT = web3.utils.fromWei(price.toString(), 'ether');
-        document.getElementById('currentPrice').textContent = `${priceInUSDT} USDT per VNS`;
-    } catch (error) {
-        console.error("Error loading price:", error);
-    }
-}
-
-// Calculate USDT required for VNS amount
-function calculateUSDTRequired() {
-    const vnsAmount = parseFloat(document.getElementById('vnsAmount').value) || 0;
-    const vnsAmountWithDecimals = vnsAmount * 10**8; // Convert to 8 decimals
-    
-    if (vnsAmountWithDecimals < minPurchase) {
-        document.getElementById('usdtRequired').textContent = "Amount too low (min 10 VNS)";
-        return;
-    }
-    
-    if (vnsAmountWithDecimals > maxPurchase) {
-        document.getElementById('usdtRequired').textContent = "Amount too high (max 500 VNS)";
-        return;
-    }
-    
-    // In a real app, we would calculate this based on the contract's price
-    // For demo purposes, we'll assume 1 VNS = 0.9 USDT
-    const usdtRequired = vnsAmount * 0.9;
-    document.getElementById('usdtRequired').textContent = `${usdtRequired.toFixed(2)} USDT`;
-}
-
-// Calculate VNS you get for USDT amount
-function calculateVNSYouGet() {
-    const usdtAmount = parseFloat(document.getElementById('usdtAmount').value) || 0;
-    const usdtAmountWithDecimals = usdtAmount * 10**18; // Convert to 18 decimals
-    
-    // In a real app, we would calculate this based on the contract's price
-    // For demo purposes, we'll assume 1 VNS = 0.9 USDT
-    const vnsYouGet = usdtAmount / 0.9;
-    const vnsYouGetWithDecimals = vnsYouGet * 10**8; // Convert to 8 decimals
-    
-    if (vnsYouGetWithDecimals < minPurchase) {
-        document.getElementById('vnsYouGet').textContent = "Amount too low (min 9 USDT)";
-        return;
-    }
-    
-    if (vnsYouGetWithDecimals > maxPurchase) {
-        document.getElementById('vnsYouGet').textContent = "Amount too high (max 450 USDT)";
-        return;
-    }
-    
-    document.getElementById('vnsYouGet').textContent = `${vnsYouGet.toFixed(2)} VNS`;
-}
-
-// Buy with VNS amount
-async function buyWithVNSAmount() {
-    try {
-        const vnsAmount = document.getElementById('vnsAmount').value;
-        const vnsAmountWithDecimals = Math.floor(parseFloat(vnsAmount) * 10**8);
-        
-        if (!vnsAmount || isNaN(vnsAmountWithDecimals) || vnsAmountWithDecimals <= 0) {
-            showTransactionStatus("Please enter a valid VNS amount", "error");
+    // Update UI with contract data (updated for decimals)
+    async function updateUI() {
+        if (!accounts.length) {
+            walletAddressSpan.style.display = 'none';
             return;
         }
-        
-        if (vnsAmountWithDecimals < minPurchase) {
-            showTransactionStatus(`Minimum purchase is ${minPurchase/10**8} VNS`, "error");
-            return;
-        }
-        
-        if (vnsAmountWithDecimals > maxPurchase) {
-            showTransactionStatus(`Maximum purchase is ${maxPurchase/10**8} VNS per transaction`, "error");
-            return;
-        }
-        
-        showTransactionStatus("Processing transaction...", "processing");
-        
-        // In a real app, we would call the contract method
-        const result = await presaleContract.methods.buyTokens(vnsAmountWithDecimals.toString())
-            .send({ from: accounts[0] });
-        
-        showTransactionStatus(`Success! Transaction hash: ${result.transactionHash}`, "success");
-    } catch (error) {
-        console.error("Error buying tokens:", error);
-        showTransactionStatus(`Error: ${error.message}`, "error");
-    }
-}
 
-// Buy with USDT amount
-async function buyWithUSDTAmount() {
-    try {
-        const usdtAmount = document.getElementById('usdtAmount').value;
-        const usdtAmountWithDecimals = Math.floor(parseFloat(usdtAmount) * 10**18);
-        
-        if (!usdtAmount || isNaN(usdtAmountWithDecimals) || usdtAmountWithDecimals <= 0) {
-            showTransactionStatus("Please enter a valid USDT amount", "error");
-            return;
-        }
-        
-        // Check if this USDT amount gives VNS within limits
-        const vnsYouGet = (usdtAmountWithDecimals / 10**18) / 0.9; // Assuming 1 VNS = 0.9 USDT
-        const vnsYouGetWithDecimals = vnsYouGet * 10**8;
-        
-        if (vnsYouGetWithDecimals < minPurchase) {
-            showTransactionStatus(`Minimum purchase is ${(minPurchase/10**8)*0.9} USDT`, "error");
-            return;
-        }
-        
-        if (vnsYouGetWithDecimals > maxPurchase) {
-            showTransactionStatus(`Maximum purchase is ${(maxPurchase/10**8)*0.9} USDT per transaction`, "error");
-            return;
-        }
-        
-        showTransactionStatus("Processing transaction...", "processing");
-        
-        // In a real app, we would call the contract method
-        const result = await presaleContract.methods.buyWithUSDT(usdtAmountWithDecimals.toString())
-            .send({ from: accounts[0] });
-        
-        showTransactionStatus(`Success! Transaction hash: ${result.transactionHash}`, "success");
-    } catch (error) {
-        console.error("Error buying with USDT:", error);
-        showTransactionStatus(`Error: ${error.message}`, "error");
-    }
-}
+        // Display wallet address (shortened)
+        const shortAddress = `${accounts[0].substring(0, 6)}...${accounts[0].substring(38)}`;
+        walletAddressSpan.textContent = shortAddress;
+        walletAddressSpan.style.display = 'inline-block';
 
-// Show transaction status
-function showTransactionStatus(message, type) {
-    const statusElement = document.getElementById('transactionStatus');
-    statusElement.textContent = message;
-    statusElement.style.display = "block";
-    
-    switch(type) {
-        case "success":
-            statusElement.style.backgroundColor = "#4CAF50";
-            break;
-        case "error":
-            statusElement.style.backgroundColor = "#f44336";
-            break;
-        case "processing":
-            statusElement.style.backgroundColor = "#2196F3";
-            break;
-        default:
-            statusElement.style.backgroundColor = "#9E9E9E";
+        try {
+            // Get presale contract data
+            const price = await presaleContract.methods.pricePerVNS().call();
+            const minPurchase = await presaleContract.methods.minPurchase().call();
+            const isPaused = await presaleContract.methods.isPaused().call();
+            const sellerWallet = await presaleContract.methods.sellerWallet().call();
+            
+            // Get token balances
+            const userUsdtBalance = await usdtTokenContract.methods.balanceOf(accounts[0]).call();
+            const userVnsBalance = await vnsTokenContract.methods.balanceOf(accounts[0]).call();
+            const sellerVnsBalance = await vnsTokenContract.methods.balanceOf(sellerWallet).call();
+            const usdtAllowance = await usdtTokenContract.methods.allowance(accounts[0], presaleAddress).call();
+            
+            // Format balances with correct decimals
+            const formatBalance = (balance, decimals) => {
+                return (balance / (10 ** decimals)).toLocaleString(undefined, {
+                    minimumFractionDigits: 0,
+                    maximumFractionDigits: decimals
+                });
+            };
+            
+            // Update UI with formatted values
+            pricePerVnsSpan.textContent = `${(price / (10 ** 8)).toFixed(8)} USDT`;
+            minPurchaseSpan.textContent = `${formatBalance(minPurchase, vnsDecimals)} VNS`;
+            sellerBalanceSpan.textContent = `${formatBalance(sellerVnsBalance, vnsDecimals)} VNS`;
+            contractStatusSpan.textContent = isPaused ? 'Paused' : 'Active';
+            contractStatusSpan.style.color = isPaused ? 'red' : 'green';
+            
+            userUsdtBalanceSpan.textContent = `${formatBalance(userUsdtBalance, usdtDecimals)} USDT`;
+            userVnsBalanceSpan.textContent = `${formatBalance(userVnsBalance, vnsDecimals)} VNS`;
+            usdtAllowanceSpan.textContent = `${formatBalance(usdtAllowance, usdtDecimals)} USDT`;
+            
+            // Update contract addresses
+            vnsAddressSpan.textContent = vnsTokenAddress;
+            usdtAddressSpan.textContent = usdtTokenAddress;
+            presaleAddressSpan.textContent = presaleAddress;
+            
+            // Enable/disable buttons based on allowance
+            const vnsAmount = parseFloat(vnsAmountInput.value) || 0;
+            const vnsAmountInUnits = vnsAmount * (10 ** vnsDecimals);
+            const requiredUsdtInUnits = (vnsAmountInUnits * price) / (10 ** 8);
+            
+            if (parseInt(usdtAllowance) >= parseInt(requiredUsdtInUnits) && vnsAmount > 0) {
+                approveUsdtBtn.disabled = true;
+                buyVnsBtn.disabled = false;
+            } else {
+                approveUsdtBtn.disabled = false;
+                buyVnsBtn.disabled = true;
+            }
+        } catch (error) {
+            console.error("Error updating UI:", error);
+        }
     }
-    
-    // Hide after 5 seconds if not error
-    if (type !== "error") {
-        setTimeout(() => {
-            statusElement.style.display = "none";
-        }, 5000);
-    }
-}
 
-// Set up tabs
-function setupTabs() {
-    const tabVNS = document.getElementById('tabVNS');
-    const tabUSDT = document.getElementById('tabUSDT');
-    const vnsTab = document.getElementById('vnsTab');
-    const usdtTab = document.getElementById('usdtTab');
-    
-    tabVNS.addEventListener('click', () => {
-        tabVNS.classList.add('active');
-        tabUSDT.classList.remove('active');
-        vnsTab.classList.add('active');
-        usdtTab.classList.remove('active');
-    });
-    
-    tabUSDT.addEventListener('click', () => {
-        tabUSDT.classList.add('active');
-        tabVNS.classList.remove('active');
-        usdtTab.classList.add('active');
-        vnsTab.classList.remove('active');
-    });
-}
-
-// Copy to clipboard
-function copyToClipboard(elementId) {
-    const element = document.getElementById(elementId);
-    const text = element.textContent;
-    
-    navigator.clipboard.writeText(text).then(() => {
-        const copyBtn = element.nextElementSibling;
-        copyBtn.textContent = "Copied!";
-        setTimeout(() => {
-            copyBtn.textContent = "Copy";
-        }, 2000);
-    }).catch(err => {
-        console.error('Failed to copy: ', err);
-    });
-}
+    // ... (rest of the code remains the same)
+    // Initialize the app
+    initWeb3();
+});

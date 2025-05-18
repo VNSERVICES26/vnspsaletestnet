@@ -11,6 +11,8 @@ let accounts;
 let usdtContract;
 let vnsContract;
 let presaleContract;
+const usdtDecimals = 18;
+const vnsDecimals = 8;
 
 window.addEventListener('load', async () => {
   if (typeof window.ethereum !== 'undefined') {
@@ -29,9 +31,11 @@ async function connectWallet() {
   try {
     accounts = await ethereum.request({ method: 'eth_requestAccounts' });
     document.getElementById('walletAddress').innerText = `Connected: ${accounts[0]}`;
+
     usdtContract = new web3.eth.Contract(usdtAbi, usdtAddress);
     vnsContract = new web3.eth.Contract(vnsAbi, vnsAddress);
     presaleContract = new web3.eth.Contract(presaleAbi, presaleAddress);
+
   } catch (error) {
     console.error(error);
     alert('Wallet connection failed!');
@@ -46,9 +50,11 @@ async function approveUSDT() {
   }
 
   try {
-    const decimals = await usdtContract.methods.decimals().call(); // Usually 6 or 18
-    const pricePerVNS = await presaleContract.methods.pricePerVNS().call(); // Assume 1 VNS = 1 USDT * 10^decimals
-    const usdtAmount = BigInt(pricePerVNS) * BigInt(amount); // Already includes decimals
+    const pricePerVNS = await presaleContract.methods.pricePerVNS().call(); // In USDT (18 decimals)
+
+    // Calculate USDT to approve: amount * pricePerVNS
+    const vnsAmountRaw = BigInt(amount);
+    const usdtAmount = vnsAmountRaw * BigInt(pricePerVNS); // Already includes decimals
 
     await usdtContract.methods
       .approve(presaleAddress, usdtAmount.toString())
@@ -69,8 +75,10 @@ async function buyVNS() {
   }
 
   try {
+    const vnsAmount = BigInt(amount) * BigInt(10 ** vnsDecimals); // 8 decimal
+
     await presaleContract.methods
-      .buyTokens(amount)
+      .buyTokens(vnsAmount.toString())
       .send({ from: accounts[0] });
 
     document.getElementById('statusMessage').innerText = '✅ VNS purchased successfully!';

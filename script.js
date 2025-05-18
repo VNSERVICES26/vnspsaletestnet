@@ -44,14 +44,20 @@ async function approveUSDT() {
     alert('Enter a valid VNS amount');
     return;
   }
+
   try {
-    const pricePerVNS = await presaleContract.methods.pricePerVNS().call();
-    const usdtAmount = (amount * pricePerVNS) / (10 ** 8);
-    await usdtContract.methods.approve(presaleAddress, usdtAmount.toString()).send({ from: accounts[0] });
-    document.getElementById('statusMessage').innerText = 'USDT approved successfully!';
+    const decimals = await usdtContract.methods.decimals().call(); // Usually 6 or 18
+    const pricePerVNS = await presaleContract.methods.pricePerVNS().call(); // Assume 1 VNS = 1 USDT * 10^decimals
+    const usdtAmount = BigInt(pricePerVNS) * BigInt(amount); // Already includes decimals
+
+    await usdtContract.methods
+      .approve(presaleAddress, usdtAmount.toString())
+      .send({ from: accounts[0] });
+
+    document.getElementById('statusMessage').innerText = '✅ USDT approved successfully!';
   } catch (error) {
     console.error(error);
-    alert('USDT approval failed!');
+    alert('❌ USDT approval failed!');
   }
 }
 
@@ -61,12 +67,16 @@ async function buyVNS() {
     alert('Enter a valid VNS amount');
     return;
   }
+
   try {
-    await presaleContract.methods.buyTokens(amount).send({ from: accounts[0] });
-    document.getElementById('statusMessage').innerText = 'VNS purchased successfully!';
+    await presaleContract.methods
+      .buyTokens(amount)
+      .send({ from: accounts[0] });
+
+    document.getElementById('statusMessage').innerText = '✅ VNS purchased successfully!';
   } catch (error) {
     console.error(error);
-    alert('VNS purchase failed!');
+    alert('❌ VNS purchase failed!');
   }
 }
 

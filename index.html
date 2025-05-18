@@ -4,9 +4,9 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>VNS Presale</title>
-    <link rel="stylesheet" href="style.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
-    <link rel="icon" href="data:,"> <!-- Favicon 404 error fix -->
+    <link rel="stylesheet" href="style.css">
+    <link rel="icon" href="data:,"> <!-- Favicon error fix -->
 </head>
 <body>
     <div class="container">
@@ -36,21 +36,25 @@
                     <span id="seller-balance">Loading...</span>
                 </div>
                 <div class="info-row">
+                    <span>Seller VNS Approval:</span>
+                    <span id="seller-approval">Loading...</span>
+                </div>
+                <div class="info-row">
                     <span>Your USDT Balance:</span>
                     <span id="usdt-balance">0.0</span>
+                </div>
+                <div class="info-row">
+                    <span>Your USDT Approval:</span>
+                    <span id="usdt-approval">Not Approved</span>
                 </div>
                 <div class="info-row">
                     <span>Minimum Purchase:</span>
                     <span id="min-purchase">Loading...</span>
                 </div>
-                <div class="info-row">
-                    <span>USDT Approval Status:</span>
-                    <span id="approval-status">Not Approved</span>
-                </div>
 
                 <div class="input-group">
                     <label for="vns-amount">VNS Amount (8 decimals):</label>
-                    <input type="number" id="vns-amount" placeholder="Enter VNS amount">
+                    <input type="number" id="vns-amount" placeholder="Enter VNS amount" min="0" step="0.00000001">
                     <div class="input-hint">≈ <span id="usdt-equivalent">0</span> USDT</div>
                 </div>
 

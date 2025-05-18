@@ -189,93 +189,95 @@ const sellerBalanceSpan = document.getElementById('seller-balance');
 const usdtBalanceSpan = document.getElementById('usdt-balance');
 const minPurchaseSpan = document.getElementById('min-purchase');
 const vnsAddressSpan = document.getElementById('vns-address');
+const approvalStatusSpan = document.getElementById('approval-status');
 const transactionStatusDiv = document.getElementById('transaction-status');
 const copyButtons = document.querySelectorAll('.copy-btn');
 
 // Initialize the application
 async function init() {
-    // Check if Web3 is injected
     if (window.ethereum) {
         web3 = new Web3(window.ethereum);
         
         try {
-            // Request account access
-            accounts = await window.ethereum.request({ method: 'eth_requestAccounts' });
+            // Check if already connected
+            accounts = await web3.eth.getAccounts();
+            if (accounts.length > 0) {
+                updateUI();
+                initializeContracts();
+            }
+            
             setupEventListeners();
-            updateUI();
-            
-            // Initialize contracts
-            presaleContract = new web3.eth.Contract(presaleABI, presaleContractAddress);
-            usdtContract = new web3.eth.Contract(erc20ABI, usdtTokenAddress);
-            
-            // Load contract data
-            loadContractData();
         } catch (error) {
-            console.error("User denied account access", error);
-            showTransactionStatus("Please connect your wallet to continue", "error");
+            console.error("Initialization error:", error);
+            showTransactionStatus("Please connect your wallet", "error");
         }
     } else {
-        console.log("No Web3 provider detected");
-        showTransactionStatus("Please install MetaMask or another Web3 wallet", "error");
+        showTransactionStatus("Please install MetaMask", "error");
     }
+}
+
+function initializeContracts() {
+    presaleContract = new web3.eth.Contract(presaleABI, presaleContractAddress);
+    usdtContract = new web3.eth.Contract(erc20ABI, usdtTokenAddress);
+    loadContractData();
 }
 
 // Set up event listeners
 function setupEventListeners() {
-    // Connect wallet button
-    connectWalletBtn.addEventListener('click', async () => {
-        if (accounts.length === 0) {
-            try {
-                accounts = await window.ethereum.request({ method: 'eth_requestAccounts' });
-                updateUI();
-                loadContractData();
-            } catch (error) {
-                console.error("User denied account access", error);
-                showTransactionStatus("Wallet connection failed", "error");
-            }
-        }
-    });
-    
-    // VNS amount input
+    connectWalletBtn.addEventListener('click', connectWallet);
     vnsAmountInput.addEventListener('input', updateUsdtEquivalent);
-    
-    // Approve USDT button
     approveUsdtBtn.addEventListener('click', approveUsdt);
-    
-    // Buy tokens button
     buyTokensBtn.addEventListener('click', buyTokens);
     
-    // Copy buttons
-    copyButtons.forEach(button => {
-        button.addEventListener('click', (e) => {
-            e.stopPropagation();
-            const textToCopy = e.target.closest('.copyable').textContent.trim().split(' ')[0];
-            navigator.clipboard.writeText(textToCopy).then(() => {
-                const originalText = button.innerHTML;
-                button.innerHTML = '<i class="fas fa-check"></i>';
-                setTimeout(() => {
-                    button.innerHTML = originalText;
-                }, 2000);
-            });
-        });
+    copyButtons.forEach(btn => {
+        btn.addEventListener('click', handleCopy);
     });
-    
-    // Handle account changes (using disconnect instead of close)
-    window.ethereum.on('disconnect', () => {
-        accounts = [];
+
+    window.ethereum.on('accountsChanged', handleAccountsChanged);
+    window.ethereum.on('chainChanged', handleChainChanged);
+    window.ethereum.on('disconnect', handleDisconnect);
+}
+
+async function connectWallet() {
+    try {
+        accounts = await window.ethereum.request({ method: 'eth_requestAccounts' });
         updateUI();
-    });
-    
-    // Handle account changes
-    window.ethereum.on('accountsChanged', (newAccounts) => {
-        accounts = newAccounts;
-        updateUI();
+        initializeContracts();
+    } catch (error) {
+        console.error("Connection error:", error);
+        showTransactionStatus("Wallet connection failed", "error");
+    }
+}
+
+function handleAccountsChanged(newAccounts) {
+    accounts = newAccounts;
+    updateUI();
+    if (accounts.length > 0) {
         loadContractData();
-    });
-    
-    // Handle chain changes
-    window.ethereum.on('chainChanged', () => {
-        window.location.reload();
+    } else {
+        resetUI();
+    }
+}
+
+function handleChainChanged() {
+    window.location.reload();
+}
+
+function handleDisconnect() {
+    accounts = [];
+    updateUI();
+    resetUI();
+}
+
+function handleCopy(e) {
+    e.stopPropagation();
+    const textToCopy = e.target.closest('.copyable').textContent.trim().split(' ')[0];
+    navigator.clipboard.writeText(textToCopy).then(() => {
+        const originalText = e.target.innerHTML;
+        e.target.innerHTML = '<i class="fas fa-check"></i>';
+        setTimeout(() => {
+            e.target.innerHTML = originalText;
+        }, 2000);
     });
 }
 
@@ -283,8 +285,7 @@ function setupEventListeners() {
 function updateUI() {
     if (accounts.length > 0) {
         connectWalletBtn.style.display = 'none';
-        const shortAddress = `${accounts[0].substring(0, 6)}...${accounts[0].substring(38)}`;
-        walletAddressSpan.textContent = shortAddress;
+        walletAddressSpan.textContent = `${accounts[0].substring(0, 6)}...${accounts[0].substring(38)}`;
         walletAddressSpan.style.display = 'inline-block';
     } else {
         connectWalletBtn.style.display = 'inline-block';
@@ -292,50 +293,66 @@ function updateUI() {
     }
 }
 
+function resetUI() {
+    currentPriceSpan.textContent = 'Loading...';
+    sellerBalanceSpan.textContent = 'Loading...';
+    usdtBalanceSpan.textContent = '0.0';
+    minPurchaseSpan.textContent = 'Loading...';
+    approvalStatusSpan.textContent = 'Not Approved';
+    approveUsdtBtn.disabled = true;
+    buyTokensBtn.disabled = true;
+}
+
 // Load contract data
 async function loadContractData() {
     try {
-        // Get VNS token address from presale contract
+        // Load VNS token address
         const vnsTokenAddress = await presaleContract.methods.vnsToken().call();
         vnsAddressSpan.textContent = vnsTokenAddress + ' ';
         
-        // Get current price
+        // Load price
         const price = await presaleContract.methods.pricePerVNS().call();
-        const formattedPrice = web3.utils.fromWei(price, 'mwei'); // Using mwei because VNS has 8 decimals
-        currentPriceSpan.textContent = `${formattedPrice} USDT`;
+        currentPriceSpan.textContent = `${web3.utils.fromWei(price, 'mwei')} USDT`;
         
-        // Get minimum purchase
+        // Load min purchase
         const minPurchase = await presaleContract.methods.minPurchase().call();
         minPurchaseSpan.textContent = `${web3.utils.fromWei(minPurchase, 'mwei')} VNS`;
         
-        // Get seller VNS balance
-        const sellerWalletAddress = await presaleContract.methods.sellerWallet().call();
+        // Load seller balance
+        const sellerWallet = await presaleContract.methods.sellerWallet().call();
         const vnsTokenContract = new web3.eth.Contract(erc20ABI, vnsTokenAddress);
-        const sellerBalance = await vnsTokenContract.methods.balanceOf(sellerWalletAddress).call();
+        const sellerBalance = await vnsTokenContract.methods.balanceOf(sellerWallet).call();
         sellerBalanceSpan.textContent = `${web3.utils.fromWei(sellerBalance, 'mwei')} VNS`;
         
-        // Get user USDT balance
+        // Load user balance and allowance
         if (accounts.length > 0) {
             const usdtBalance = await usdtContract.methods.balanceOf(accounts[0]).call();
             usdtBalanceSpan.textContent = `${web3.utils.fromWei(usdtBalance, 'ether')} USDT`;
             
-            // Check USDT allowance
             const allowance = await usdtContract.methods.allowance(accounts[0], presaleContractAddress).call();
-            if (allowance > 0) {
-                approveUsdtBtn.disabled = true;
-                buyTokensBtn.disabled = false;
-            } else {
-                approveUsdtBtn.disabled = false;
-                buyTokensBtn.disabled = true;
-            }
+            updateApprovalStatus(allowance);
         }
     } catch (error) {
-        console.error("Error loading contract data:", error);
+        console.error("Error loading data:", error);
         showTransactionStatus("Error loading contract data", "error");
     }
 }
 
-// Update USDT equivalent based on VNS amount
+function updateApprovalStatus(allowance) {
+    if (BigInt(allowance) > 0) {
+        approvalStatusSpan.textContent = "Approved";
+        approvalStatusSpan.style.color = "#2ecc71";
+        approveUsdtBtn.disabled = true;
+        buyTokensBtn.disabled = false;
+    } else {
+        approvalStatusSpan.textContent = "Not Approved";
+        approvalStatusSpan.style.color = "#e74c3c";
+        approveUsdtBtn.disabled = false;
+        buyTokensBtn.disabled = true;
+    }
+}
+
+// Update USDT equivalent
 function updateUsdtEquivalent() {
     const vnsAmount = parseFloat(vnsAmountInput.value);
     if (!isNaN(vnsAmount) && vnsAmount > 0) {
@@ -343,17 +360,12 @@ function updateUsdtEquivalent() {
         const price = parseFloat(priceText);
         
         if (!isNaN(price)) {
-            // Calculate USDT amount considering decimals (VNS:8, USDT:18)
             const usdtEquivalent = (vnsAmount * price).toFixed(6);
             usdtEquivalentSpan.textContent = usdtEquivalent;
             
-            // Enable/disable buttons based on input
-            if (vnsAmount > 0) {
-                if (approveUsdtBtn.disabled && !buyTokensBtn.disabled) {
-                    buyTokensBtn.disabled = false;
-                }
-            } else {
-                buyTokensBtn.disabled = true;
+            // Enable buy button if approved
+            if (approvalStatusSpan.textContent === "Approved") {
+                buyTokensBtn.disabled = false;
             }
         }
     } else {
@@ -362,7 +374,7 @@ function updateUsdtEquivalent() {
     }
 }
 
-// Approve USDT spending
+// Approve USDT
 async function approveUsdt() {
     if (accounts.length === 0) return;
     
@@ -370,32 +382,30 @@ async function approveUsdt() {
         showTransactionStatus("Approving USDT...", "info");
         approveUsdtBtn.disabled = true;
         
-        // Calculate the amount to approve (approve max uint256)
-        const amountToApprove = web3.utils.toBN('2').pow(web3.utils.toBN('256')).sub(web3.utils.toBN('1'));
+        const amountToApprove = web3.utils.toBN('0xffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff');
         
         const tx = await usdtContract.methods.approve(presaleContractAddress, amountToApprove)
             .send({ from: accounts[0] });
             
-        showTransactionStatus("USDT approval successful!", "success");
-        approveUsdtBtn.disabled = true;
-        buyTokensBtn.disabled = false;
+        showTransactionStatus("USDT successfully approved!", "success");
         
-        // Refresh allowance data
-        loadContractData();
+        // Update allowance status
+        const allowance = await usdtContract.methods.allowance(accounts[0], presaleContractAddress).call();
+        updateApprovalStatus(allowance);
     } catch (error) {
-        console.error("Error approving USDT:", error);
-        showTransactionStatus("USDT approval failed: " + error.message, "error");
+        console.error("Approval error:", error);
+        showTransactionStatus(`Approval failed: ${error.message}`, "error");
         approveUsdtBtn.disabled = false;
     }
 }
 
-// Buy VNS tokens
+// Buy tokens with all checks
 async function buyTokens() {
     if (accounts.length === 0) return;
     
     const vnsAmount = parseFloat(vnsAmountInput.value);
     if (isNaN(vnsAmount) || vnsAmount <= 0) {
-        showTransactionStatus("Please enter a valid VNS amount", "error");
+        showTransactionStatus("Please enter valid VNS amount", "error");
         return;
     }
     
@@ -403,31 +413,66 @@ async function buyTokens() {
         showTransactionStatus("Processing purchase...", "info");
         buyTokensBtn.disabled = true;
         
-        // Convert VNS amount to the correct decimals (8)
+        // 1. Check contract pause status
+        const isPaused = await presaleContract.methods.isPaused().call();
+        if (isPaused) {
+            throw new Error("Presale is currently paused");
+        }
+        
+        // 2. Convert amount to wei (8 decimals)
         const vnsAmountWei = web3.utils.toWei(vnsAmount.toString(), 'mwei');
         
+        // 3. Calculate required USDT
+        const pricePerVNS = await presaleContract.methods.pricePerVNS().call();
+        const usdtAmount = (BigInt(vnsAmountWei) * BigInt(pricePerVNS)) / BigInt(10**8);
+        
+        // 4. Check balances and allowance
+        const checks = await Promise.all([
+            usdtContract.methods.balanceOf(accounts[0]).call(),
+            usdtContract.methods.allowance(accounts[0], presaleContractAddress).call(),
+            presaleContract.methods.sellerWallet().call(),
+            presaleContract.methods.vnsToken().call()
+        ]);
+        
+        const [usdtBalance, allowance, sellerWallet, vnsTokenAddress] = checks;
+        
+        if (BigInt(usdtBalance) < usdtAmount) {
+            throw new Error("Insufficient USDT balance");
+        }
+        
+        if (BigInt(allowance) < usdtAmount) {
+            throw new Error("Insufficient USDT allowance");
+        }
+        
+        const vnsTokenContract = new web3.eth.Contract(erc20ABI, vnsTokenAddress);
+        const sellerBalance = await vnsTokenContract.methods.balanceOf(sellerWallet).call();
+        
+        if (BigInt(sellerBalance) < BigInt(vnsAmountWei)) {
+            throw new Error("Seller has insufficient VNS tokens");
+        }
+        
+        // 5. Execute purchase
         const tx = await presaleContract.methods.buyTokens(vnsAmountWei)
             .send({ from: accounts[0] });
             
         showTransactionStatus("Purchase successful!", "success");
         
-        // Refresh balances
+        // Refresh data
         loadContractData();
     } catch (error) {
-        console.error("Error buying tokens:", error);
-        showTransactionStatus("Purchase failed: " + error.message, "error");
-        buyTokensBtn.disabled = false;
+        console.error("Purchase error:", error);
+        showTransactionStatus(`Purchase failed: ${error.message}`, "error");
     } finally {
         buyTokensBtn.disabled = false;
     }
 }
 
-// Show transaction status
+// Show status messages
 function showTransactionStatus(message, type) {
     transactionStatusDiv.textContent = message;
     transactionStatusDiv.className = '';
     transactionStatusDiv.classList.add(type);
 }
 
-// Initialize the app when the page loads
+// Initialize when page loads
 window.addEventListener('load', init);

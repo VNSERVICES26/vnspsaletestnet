@@ -1,4 +1,4 @@
-// Contract ABI
+// Contract ABI - Updated with correct buyTokens function signature
 const presaleABI = [
     {
         "inputs": [
@@ -23,7 +23,9 @@ const presaleABI = [
         "type": "event"
     },
     {
-        "inputs": [],
+        "inputs": [
+            {"internalType": "uint256", "name": "vnsAmount", "type": "uint256"}
+        ],
         "name": "buyTokens",
         "outputs": [],
         "stateMutability": "nonpayable",
@@ -258,6 +260,12 @@ function setupEventListeners() {
         });
     });
     
+    // Handle account changes (using disconnect instead of close)
+    window.ethereum.on('disconnect', () => {
+        accounts = [];
+        updateUI();
+    });
+    
     // Handle account changes
     window.ethereum.on('accountsChanged', (newAccounts) => {
         accounts = newAccounts;
@@ -293,11 +301,12 @@ async function loadContractData() {
         
         // Get current price
         const price = await presaleContract.methods.pricePerVNS().call();
-        currentPriceSpan.textContent = `${web3.utils.fromWei(price, 'mwei')} USDT`; // Using mwei because VNS has 8 decimals
+        const formattedPrice = web3.utils.fromWei(price, 'mwei'); // Using mwei because VNS has 8 decimals
+        currentPriceSpan.textContent = `${formattedPrice} USDT`;
         
         // Get minimum purchase
         const minPurchase = await presaleContract.methods.minPurchase().call();
-        minPurchaseSpan.textContent = `${web3.utils.fromWei(minPurchase, 'mwei')} VNS`; // Using mwei for 8 decimals
+        minPurchaseSpan.textContent = `${web3.utils.fromWei(minPurchase, 'mwei')} VNS`;
         
         // Get seller VNS balance
         const sellerWalletAddress = await presaleContract.methods.sellerWallet().call();
@@ -308,8 +317,7 @@ async function loadContractData() {
         // Get user USDT balance
         if (accounts.length > 0) {
             const usdtBalance = await usdtContract.methods.balanceOf(accounts[0]).call();
-            const usdtDecimals = await usdtContract.methods.decimals().call();
-            usdtBalanceSpan.textContent = `${web3.utils.fromWei(usdtBalance, 'ether')} USDT`; // USDT has 18 decimals
+            usdtBalanceSpan.textContent = `${web3.utils.fromWei(usdtBalance, 'ether')} USDT`;
             
             // Check USDT allowance
             const allowance = await usdtContract.methods.allowance(accounts[0], presaleContractAddress).call();
@@ -329,12 +337,28 @@ async function loadContractData() {
 
 // Update USDT equivalent based on VNS amount
 function updateUsdtEquivalent() {
-    const vnsAmount = vnsAmountInput.value;
-    if (vnsAmount && !isNaN(vnsAmount)) {
-        const usdtEquivalent = (vnsAmount * parseFloat(currentPriceSpan.textContent)) / 100; // Adjust for decimals
-        usdtEquivalentSpan.textContent = usdtEquivalent.toFixed(6);
+    const vnsAmount = parseFloat(vnsAmountInput.value);
+    if (!isNaN(vnsAmount) && vnsAmount > 0) {
+        const priceText = currentPriceSpan.textContent.split(' ')[0];
+        const price = parseFloat(priceText);
+        
+        if (!isNaN(price)) {
+            // Calculate USDT amount considering decimals (VNS:8, USDT:18)
+            const usdtEquivalent = (vnsAmount * price).toFixed(6);
+            usdtEquivalentSpan.textContent = usdtEquivalent;
+            
+            // Enable/disable buttons based on input
+            if (vnsAmount > 0) {
+                if (approveUsdtBtn.disabled && !buyTokensBtn.disabled) {
+                    buyTokensBtn.disabled = false;
+                }
+            } else {
+                buyTokensBtn.disabled = true;
+            }
+        }
     } else {
         usdtEquivalentSpan.textContent = '0';
+        buyTokensBtn.disabled = true;
     }
 }
 
@@ -344,9 +368,10 @@ async function approveUsdt() {
     
     try {
         showTransactionStatus("Approving USDT...", "info");
+        approveUsdtBtn.disabled = true;
         
-        // Calculate the amount to approve (in this case, we approve a very large amount)
-        const amountToApprove = web3.utils.toWei('1000000000', 'ether'); // Approve 1 billion USDT
+        // Calculate the amount to approve (approve max uint256)
+        const amountToApprove = web3.utils.toBN('2').pow(web3.utils.toBN('256')).sub(web3.utils.toBN('1'));
         
         const tx = await usdtContract.methods.approve(presaleContractAddress, amountToApprove)
             .send({ from: accounts[0] });
@@ -359,7 +384,8 @@ async function approveUsdt() {
         loadContractData();
     } catch (error) {
         console.error("Error approving USDT:", error);
-        showTransactionStatus("USDT approval failed", "error");
+        showTransactionStatus("USDT approval failed: " + error.message, "error");
+        approveUsdtBtn.disabled = false;
     }
 }
 
@@ -367,17 +393,18 @@ async function approveUsdt() {
 async function buyTokens() {
     if (accounts.length === 0) return;
     
-    const vnsAmount = vnsAmountInput.value;
-    if (!vnsAmount || isNaN(vnsAmount) || parseFloat(vnsAmount) <= 0) {
+    const vnsAmount = parseFloat(vnsAmountInput.value);
+    if (isNaN(vnsAmount) || vnsAmount <= 0) {
         showTransactionStatus("Please enter a valid VNS amount", "error");
         return;
     }
     
     try {
         showTransactionStatus("Processing purchase...", "info");
+        buyTokensBtn.disabled = true;
         
         // Convert VNS amount to the correct decimals (8)
-        const vnsAmountWei = web3.utils.toWei(vnsAmount, 'mwei');
+        const vnsAmountWei = web3.utils.toWei(vnsAmount.toString(), 'mwei');
         
         const tx = await presaleContract.methods.buyTokens(vnsAmountWei)
             .send({ from: accounts[0] });
@@ -389,6 +416,9 @@ async function buyTokens() {
     } catch (error) {
         console.error("Error buying tokens:", error);
         showTransactionStatus("Purchase failed: " + error.message, "error");
+        buyTokensBtn.disabled = false;
+    } finally {
+        buyTokensBtn.disabled = false;
     }
 }
 

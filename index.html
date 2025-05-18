@@ -3,100 +3,63 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>VNS Token Presale</title>
-    <link rel="icon" href="data:,"> <!-- Fixes favicon error -->
+    <title>VNS Presale</title>
     <link rel="stylesheet" href="style.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
 </head>
 <body>
     <div class="container">
         <header>
-            <h1>VNS Token Presale</h1>
+            <h1>VNS Presale</h1>
             <div id="wallet-section">
                 <button id="connect-wallet">Connect Wallet</button>
                 <span id="wallet-address"></span>
             </div>
         </header>
 
-        <div class="dashboard">
-            <div class="info-card">
-                <h3>Presale Information</h3>
+        <div class="card">
+            <div class="card-header">
+                <h2>Purchase VNS Tokens</h2>
+            </div>
+            <div class="card-body">
                 <div class="info-row">
-                    <span>Price per VNS:</span>
-                    <span id="price-per-vns">Loading...</span>
+                    <span>VNS Token Address:</span>
+                    <span id="vns-address" class="copyable">0x... <button class="copy-btn"><i class="fas fa-copy"></i></button></span>
                 </div>
                 <div class="info-row">
-                    <span>Minimum Purchase:</span>
-                    <span id="min-purchase">Loading...</span>
+                    <span>Current Price:</span>
+                    <span id="current-price">Loading...</span>
                 </div>
                 <div class="info-row">
                     <span>Seller VNS Balance:</span>
                     <span id="seller-balance">Loading...</span>
                 </div>
                 <div class="info-row">
-                    <span>Contract Status:</span>
-                    <span id="contract-status">Loading...</span>
-                </div>
-            </div>
-
-            <div class="user-card">
-                <h3>Your Information</h3>
-                <div class="info-row">
                     <span>Your USDT Balance:</span>
-                    <span id="user-usdt-balance">0.00</span>
+                    <span id="usdt-balance">0.0</span>
                 </div>
                 <div class="info-row">
-                    <span>Your VNS Balance:</span>
-                    <span id="user-vns-balance">0.00</span>
+                    <span>Minimum Purchase:</span>
+                    <span id="min-purchase">Loading...</span>
                 </div>
-                <div class="info-row">
-                    <span>USDT Allowance:</span>
-                    <span id="usdt-allowance">0.00</span>
+
+                <div class="input-group">
+                    <label for="vns-amount">VNS Amount (8 decimals):</label>
+                    <input type="number" id="vns-amount" placeholder="Enter VNS amount">
+                    <div class="input-hint">≈ <span id="usdt-equivalent">0</span> USDT</div>
                 </div>
-            </div>
-        </div>
 
-        <div class="buy-section">
-            <h2>Buy VNS Tokens</h2>
-            <div class="input-group">
-                <label for="vns-amount">VNS Amount:</label>
-                <input type="number" id="vns-amount" placeholder="Enter VNS amount">
-                <div class="calc-group">
-                    <span>=</span>
-                    <span id="usdt-equivalent">0.00</span>
-                    <span>USDT</span>
+                <div class="button-group">
+                    <button id="approve-usdt" disabled>Approve USDT</button>
+                    <button id="buy-tokens" disabled>Buy VNS Tokens</button>
                 </div>
-            </div>
 
-            <div class="button-group">
-                <button id="approve-usdt">Approve USDT</button>
-                <button id="buy-vns">Buy VNS</button>
-            </div>
-
-            <div id="transaction-status"></div>
-        </div>
-
-        <div class="contract-info">
-            <h3>Contract Addresses</h3>
-            <div class="address-row">
-                <span>VNS Token:</span>
-                <span id="vns-address" class="copyable">Loading...</span>
-                <button class="copy-btn" data-target="vns-address"><i class="fas fa-copy"></i></button>
-            </div>
-            <div class="address-row">
-                <span>USDT Token:</span>
-                <span id="usdt-address" class="copyable">Loading...</span>
-                <button class="copy-btn" data-target="usdt-address"><i class="fas fa-copy"></i></button>
-            </div>
-            <div class="address-row">
-                <span>Presale Contract:</span>
-                <span id="presale-address" class="copyable">Loading...</span>
-                <button class="copy-btn" data-target="presale-address"><i class="fas fa-copy"></i></button>
+                <div id="transaction-status"></div>
             </div>
         </div>
     </div>
 
-     <script src="https://cdn.jsdelivr.net/npm/web3@1.5.2/dist/web3.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/web3@1.5.2/dist/web3.min.js"></script>
     <script src="script.js"></script>
 </body>
 </html>

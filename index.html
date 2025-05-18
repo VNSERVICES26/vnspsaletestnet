@@ -5,8 +5,202 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>VNS Presale</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
-    <link rel="stylesheet" href="style.css">
-    <link rel="icon" href="data:,"> <!-- Favicon error fix -->
+    <style>
+:root {
+    --primary: #000000;
+    --secondary: #FFD700;
+    --background: #f5f5f5;
+    --card-bg: #ffffff;
+    --text: #333333;
+    --text-light: #777777;
+    --error: #e74c3c;
+    --success: #2ecc71;
+}
+
+body {
+    font-family: 'Arial', sans-serif;
+    background-color: var(--background);
+    color: var(--text);
+    margin: 0;
+    padding: 20px;
+    line-height: 1.6;
+}
+
+.container {
+    max-width: 800px;
+    margin: 0 auto;
+    background: var(--card-bg);
+    padding: 20px;
+    border-radius: 8px;
+    box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+}
+
+header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 30px;
+    padding-bottom: 15px;
+    border-bottom: 2px solid var(--secondary);
+}
+
+h1, h2 {
+    color: var(--primary);
+}
+
+h1 {
+    margin: 0;
+}
+
+h2 {
+    margin-top: 0;
+    font-size: 1.5rem;
+}
+
+.card {
+    background-color: var(--card-bg);
+    border-radius: 8px;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+    overflow: hidden;
+}
+
+.card-header {
+    background-color: var(--primary);
+    color: white;
+    padding: 15px 20px;
+}
+
+.card-body {
+    padding: 20px;
+}
+
+.info-row {
+    display: flex;
+    justify-content: space-between;
+    margin-bottom: 15px;
+    padding-bottom: 10px;
+    border-bottom: 1px solid #eee;
+}
+
+.copyable {
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    gap: 5px;
+}
+
+.copy-btn {
+    background: none;
+    border: none;
+    color: var(--secondary);
+    cursor: pointer;
+    padding: 0;
+    font-size: 14px;
+}
+
+.input-group {
+    margin-bottom: 20px;
+}
+
+.input-group label {
+    display: block;
+    margin-bottom: 8px;
+    font-weight: bold;
+}
+
+.input-group input {
+    width: 100%;
+    padding: 10px;
+    border: 1px solid #ddd;
+    border-radius: 4px;
+    font-size: 16px;
+}
+
+.input-hint {
+    font-size: 14px;
+    color: var(--text-light);
+    margin-top: 5px;
+}
+
+.button-group {
+    display: flex;
+    gap: 10px;
+    margin-top: 20px;
+}
+
+button {
+    background-color: var(--primary);
+    color: white;
+    border: none;
+    padding: 12px 20px;
+    border-radius: 4px;
+    cursor: pointer;
+    font-size: 16px;
+    font-weight: bold;
+    flex: 1;
+    transition: background-color 0.3s;
+}
+
+button:hover {
+    background-color: #333;
+}
+
+button:disabled {
+    background-color: #cccccc;
+    cursor: not-allowed;
+}
+
+button.secondary {
+    background-color: var(--secondary);
+    color: var(--primary);
+}
+
+button.secondary:hover {
+    background-color: #e6c200;
+}
+
+#wallet-address {
+    font-family: monospace;
+    background-color: #f0f0f0;
+    padding: 5px 10px;
+    border-radius: 4px;
+    font-size: 14px;
+    display: none;
+}
+
+#transaction-status {
+    margin-top: 20px;
+    padding: 10px;
+    border-radius: 4px;
+    display: none;
+}
+
+#transaction-status.success {
+    background-color: rgba(46, 204, 113, 0.2);
+    border: 1px solid var(--success);
+    color: var(--success);
+    display: block;
+}
+
+#transaction-status.error {
+    background-color: rgba(231, 76, 60, 0.2);
+    border: 1px solid var(--error);
+    color: var(--error);
+    display: block;
+}
+
+@media (max-width: 600px) {
+    header {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 10px;
+    }
+    
+    .button-group {
+        flex-direction: column;
+    }
+}
+    </style>
 </head>
 <body>
     <div class="container">

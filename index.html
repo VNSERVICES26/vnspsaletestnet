@@ -3,27 +3,31 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>Buy VNST Token</title>
+  <title>VNST Token Presale</title>
   <link rel="stylesheet" href="style.css" />
+  <script src="https://cdn.jsdelivr.net/npm/ethers@5.7.2/dist/ethers.umd.min.js"></script>
 </head>
 <body>
   <div class="container">
-    <h1>Buy VNST Token</h1>
-    <button id="connectWallet">Connect Wallet</button>
-    <div id="walletAddress"></div>
+    <h1>VNST Token Presale</h1>
 
-    <div class="form">
-      <input type="number" id="vnstAmount" placeholder="Enter VNST amount" />
-      <button id="approveBtn">Approve USDT</button>
-      <button id="buyBtn">Buy VNST</button>
+    <p class="address">
+      VNST Contract: 
+      <span id="contractAddress">0xYourVNSTContract</span>
+      <button onclick="copyAddress()">📋</button>
+    </p>
+
+    <p><strong>Seller Wallet Balance:</strong> <span id="sellerBalance">Loading...</span> VNST</p>
+
+    <div class="card">
+      <input type="number" id="vnstAmount" placeholder="Enter VNST Amount (Min 100)" />
+      <button onclick="connectWallet()">🔌 Connect Wallet</button>
+      <button onclick="approveUSDT()">✅ Approve USDT</button>
+      <button onclick="buyVNST()">💰 Buy VNST</button>
+      <p id="status"></p>
     </div>
-
-    <div id="status"></div>
   </div>
 
-  <script src="https://cdn.jsdelivr.net/npm/ethers/dist/ethers.min.js"></script>
-  <script src="https://unpkg.com/@walletconnect/web3-provider@1.8.0/dist/umd/index.min.js"></script>
-  <script src="https://unpkg.com/web3modal"></script>
   <script src="script.js"></script>
 </body>
 </html>

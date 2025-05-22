@@ -1,52 +1,50 @@
 body {
-  margin: 0;
-  font-family: 'Segoe UI', sans-serif;
-  background: black;
+  background-color: #000;
   color: gold;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  height: 100vh;
-}
-
-.container {
-  background: #111;
-  padding: 2rem;
-  border-radius: 16px;
-  box-shadow: 0 0 20px gold;
-  max-width: 400px;
-  width: 100%;
+  font-family: Arial, sans-serif;
+  margin: 0;
+  padding: 0;
   text-align: center;
 }
 
-h1 {
-  margin-bottom: 20px;
+.container {
+  margin-top: 50px;
+  padding: 20px;
+}
+
+.card {
+  background-color: #111;
+  border: 1px solid gold;
+  border-radius: 10px;
+  padding: 20px;
+  margin-top: 20px;
+  display: inline-block;
 }
 
 input {
   padding: 10px;
-  width: 100%;
+  width: 80%;
   margin: 10px 0;
-  font-size: 16px;
-  border-radius: 8px;
   border: 1px solid gold;
-  background: black;
+  background: #222;
   color: gold;
 }
 
 button {
-  padding: 12px;
-  background: gold;
+  padding: 10px 20px;
+  margin: 10px 5px;
+  background-color: gold;
   color: black;
   border: none;
-  font-weight: bold;
-  margin: 5px;
-  border-radius: 8px;
+  border-radius: 5px;
   cursor: pointer;
-  width: 100%;
 }
 
-#status {
-  margin-top: 10px;
-  font-size: 14px;
+button:hover {
+  background-color: #ffc107;
+}
+
+.address {
+  margin-bottom: 10px;
+  font-size: 0.9rem;
 }
